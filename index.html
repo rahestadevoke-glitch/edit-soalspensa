@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor Bank Soal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eaf6f5;--card:#ffffff;--tx:#10302f;--mut:#5f7a7a;--bd:#d3e7e4;--soft:#f2faf9;
+  --pri:#06383d;--pri2:#0b6168;--tosca:#14b8a6;--gold:#b08d57;--gold2:#d6b98a;--goldbg:#f6efe2;--ok:#2f7d5b;--bad:#b4403a;
+  --orb1:rgba(176,141,87,.20);--orb2:rgba(20,184,166,.24);
+  --sh:0 1px 2px rgba(6,56,61,.06),0 8px 24px -12px rgba(6,56,61,.20);
+  --sh-lg:0 2px 4px rgba(6,56,61,.05),0 30px 60px -24px rgba(6,56,61,.36);
+  --ease:cubic-bezier(.22,.8,.24,1);
+  --serif:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#041416;--card:#0a2427;--tx:#e3f3f1;--mut:#86a9a8;--bd:#15424a;--soft:#0e2d31;
+  --pri:#03100f;--pri2:#0e6b70;--gold:#d2ae75;--gold2:#ecd2a3;--goldbg:#2a2418;--ok:#4fb386;--bad:#e0716a;
+  --orb1:rgba(210,174,117,.10);--orb2:rgba(20,184,166,.20);
+  --sh:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  --sh-lg:0 2px 4px rgba(0,0,0,.4),0 30px 60px -24px rgba(0,0,0,.8);}}
+
+*{box-sizing:border-box}
+html,body{height:auto}
+body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh}
+::selection{background:color-mix(in srgb,var(--gold) 35%,transparent)}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;letter-spacing:.005em;font-variant-numeric:lining-nums}
+
+/* latar: dua cahaya lembut yang bergeser perlahan */
+body::before,body::after{content:"";position:fixed;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(70px);width:52vmax;height:52vmax}
+body::before{background:var(--orb1);top:-22vmax;right:-14vmax;animation:drift 32s ease-in-out infinite alternate}
+body::after{background:var(--orb2);bottom:-26vmax;left:-18vmax;animation:drift 38s ease-in-out infinite alternate-reverse}
+
+.ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* ---------- form dasar ---------- */
+input,select,textarea,button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 12px;
+  transition:border-color .25s var(--ease),box-shadow .25s var(--ease),background-color .25s var(--ease),transform .2s var(--ease),filter .25s}
+input:hover,select:hover,textarea:hover{border-color:color-mix(in srgb,var(--gold) 45%,var(--bd))}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 22%,transparent)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+textarea{width:100%;resize:vertical;min-height:96px;line-height:1.65}
+input[type=text],input[type=password]{width:100%}
+select{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a93a8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:13px}
+
+button{cursor:pointer;background:var(--pri);color:#fff;border:0;font-weight:600;padding:9px 18px;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
+button:hover{background:var(--pri2);transform:translateY(-1px)}
+button:active{transform:translateY(0) scale(.98)}
+button.sec{background:var(--card);color:var(--tx);border:1px solid var(--bd);font-weight:500}
+button.sec:hover{background:var(--soft);border-color:var(--gold)}
+button.bad{background:transparent;color:var(--bad);border:1px solid color-mix(in srgb,var(--bad) 40%,transparent)}
+button.bad:hover{background:var(--bad);color:#fff;border-color:var(--bad)}
+button:disabled{opacity:.55;cursor:default;transform:none}
+
+/* kilau emas pada tombol utama saat disorot */
+#btnLogin::after,#btnNew::after,.bar button:first-child::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.38) 50%,transparent 70%);transform:translateX(-130%)}
+#btnLogin:hover::after,#btnNew:hover::after,.bar button:first-child:hover::after{transform:translateX(130%);transition:transform .8s var(--ease)}
+
+input[type=checkbox]{appearance:none;-webkit-appearance:none;width:19px;height:19px;padding:0;border-radius:6px;border:1.5px solid var(--bd);display:inline-grid;place-items:center;flex:none;cursor:pointer;background:var(--card)}
+input[type=checkbox]::after{content:"";width:5px;height:9px;border:solid var(--pri);border-width:0 2px 2px 0;transform:rotate(45deg) scale(0);margin-top:-2px;transition:transform .25s var(--ease)}
+input[type=checkbox]:checked{background:var(--gold);border-color:var(--gold)}
+input[type=checkbox]:checked::after{transform:rotate(45deg) scale(1)}
+
+/* ---------- login ---------- */
+#login{width:min(400px,calc(100% - 32px));margin:14vh auto 0;background:var(--card);padding:42px 34px 30px;border-radius:22px;border:1px solid var(--bd);
+  box-shadow:var(--sh-lg);display:grid;gap:14px;position:relative;overflow:hidden;animation:loginIn .9s var(--ease) backwards}
+#login::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold));transform-origin:left;animation:garis 1.2s .35s var(--ease) backwards}
+#login>*{animation:naik .75s var(--ease) backwards}
+#login>:nth-child(1){animation-delay:.25s}
+#login>:nth-child(2){animation-delay:.33s}
+#login>:nth-child(3){animation-delay:.41s}
+#login>:nth-child(4){animation-delay:.49s}
+#login>:nth-child(5){animation-delay:.57s}
+#login.out{animation:keluar .45s var(--ease) forwards;pointer-events:none}
+#login.shake{animation:shake .5s var(--ease)}
+.emblem{width:60px;height:60px;border-radius:50%;margin:0 auto 4px;display:grid;place-items:center;color:var(--gold2);
+  background:linear-gradient(145deg,var(--pri2),var(--pri));border:1.5px solid var(--gold);
+  box-shadow:0 0 0 6px color-mix(in srgb,var(--gold) 14%,transparent),0 12px 24px -10px rgba(6,56,61,.55)}
+.emblem .ic{width:28px;height:28px;stroke-width:1.5}
+#login h2{margin:0;font-size:34px;line-height:1.1;text-align:center;color:var(--pri)}
+#login .sub{margin:-6px 0 6px;color:var(--mut);text-align:center}
+#login input[type=password]{padding:12px 14px 12px 42px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a93a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='11' width='16' height='10' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:14px center;background-size:17px}
+#login button{padding:13px 18px;background:linear-gradient(135deg,var(--pri2),var(--pri));letter-spacing:.02em}
+#login button:hover{filter:brightness(1.12)}
+#loginErr{color:var(--bad);min-height:1.2em;font-size:13px;text-align:center}
+@media (prefers-color-scheme:dark){#login h2{color:var(--tx)}#login button{border:1px solid rgba(255,255,255,.1)}}
+
+/* ---------- header ---------- */
+header{background:linear-gradient(180deg,color-mix(in srgb,var(--pri) 90%,#fff),var(--pri));color:#fff;padding:12px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:5;
+  box-shadow:0 14px 30px -20px rgba(0,0,0,.55)}
+header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold) 18%,var(--gold2) 50%,var(--gold) 82%,transparent)}
+header h1{font-size:23px;margin:0 auto 0 0;color:#fff;font-weight:600;display:flex;align-items:center;gap:12px;letter-spacing:.01em}
+header h1 .mark{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold2);background:rgba(255,255,255,.05)}
+header h1 .mark .ic{width:18px;height:18px;stroke-width:1.6}
+header select,header input{max-width:250px;background-color:rgba(255,255,255,.07);color:#fff;border:1px solid rgba(255,255,255,.16)}
+header select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9cfdd' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")}
+header input{padding-left:38px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9cfdd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:13px center;background-size:15px}
+header select:hover,header input:hover{background-color:rgba(255,255,255,.11);border-color:rgba(255,255,255,.3)}
+header select:focus,header input:focus{background-color:rgba(255,255,255,.12);border-color:var(--gold)}
+header select option{color:#10302f;background:#fff}
+header input::placeholder{color:rgba(255,255,255,.55)}
+header button.sec{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.26)}
+header button.sec:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.45)}
+#btnReload .ic{transition:transform .6s var(--ease)}
+#btnReload:hover .ic{transform:rotate(180deg)}
+header #btnNew{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#06383d}
+header #btnNew:hover{filter:brightness(1.07)}
+header.reveal{animation:headerIn .8s var(--ease) backwards}
+
+/* ---------- tata letak ---------- */
+#app{display:none;grid-template-columns:minmax(280px,360px) 1fr;gap:22px;padding:24px;align-items:start;max-width:1280px;margin:0 auto}
+@media(max-width:800px){#app{grid-template-columns:1fr;padding:14px}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;box-shadow:var(--sh)}
+#app.reveal #list{animation:naik .8s .2s var(--ease) backwards}
+#app.reveal #hint{animation:naik .8s .35s var(--ease) backwards}
+
+/* ---------- daftar soal ---------- */
+#list{max-height:calc(100vh - 112px);overflow:auto;position:sticky;top:78px;padding:8px}
+@media(max-width:800px){#list{position:static;max-height:300px}}
+.item{position:relative;padding:11px 12px 11px 16px;border-radius:11px;cursor:pointer;display:flex;gap:10px;align-items:center;transition:background-color .25s var(--ease)}
+.item+.item{margin-top:2px}
+.item::before{content:"";position:absolute;left:3px;top:50%;height:0;width:3px;border-radius:3px;background:linear-gradient(var(--gold2),var(--gold));transform:translateY(-50%);transition:height .35s var(--ease)}
+.item:hover{background:var(--soft)}
+.item.on{background:var(--goldbg)}
+.item.on::before{height:58%}
+.item.anim{animation:itemIn .5s var(--ease) backwards;animation-delay:calc(var(--i,0)*32ms)}
+.item b{min-width:30px;font-family:var(--serif);font-size:17px;font-variant-numeric:lining-nums;color:var(--mut);font-weight:600;text-align:right;transition:color .25s}
+.item:hover b{color:var(--tx)}
+.item.on b{color:var(--gold)}
+.item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.item small{width:24px;height:24px;border-radius:50%;background:var(--pri);color:var(--gold2);display:grid;place-items:center;font-weight:600;font-size:11px;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 50%,transparent);transition:transform .3s var(--ease)}
+.item:hover small,.item.on small{transform:scale(1.1)}
+.item small:empty{display:none}
+.empty{padding:40px 20px;text-align:center;color:var(--mut);font-family:var(--serif);font-size:19px}
+
+/* ---------- panel kosong ---------- */
+#hint{display:grid;place-items:center;text-align:center;padding:90px 30px;min-height:440px;position:sticky;top:78px;background:transparent;border-style:dashed;box-shadow:none;color:var(--mut)}
+#hint .emblem{margin-bottom:14px}
+#hint h3{margin:0 0 6px;font-size:26px;color:var(--pri)}
+#hint p{margin:0 auto;max-width:34ch}
+@media (prefers-color-scheme:dark){#hint h3{color:var(--tx)}}
+#editor[style*="block"]~#hint{display:none}
+@media(max-width:800px){#hint{display:none}}
+
+/* ---------- editor ---------- */
+#editor{padding:30px 34px;display:none}
+#editor.enter{animation:editorIn .6s var(--ease) backwards}
+@media(max-width:600px){#editor{padding:20px 16px}}
+#editor h3{font-size:27px;line-height:1.2;margin:0 0 16px!important;padding-bottom:14px;border-bottom:1px solid var(--bd);color:var(--pri);position:relative}
+#editor h3::after{content:"";position:absolute;left:0;bottom:-1px;width:60px;height:2px;background:linear-gradient(90deg,var(--gold),var(--gold2));transform-origin:left;animation:garis .9s .2s var(--ease) backwards}
+@media (prefers-color-scheme:dark){#editor h3{color:var(--tx)}}
+#editor h4{font-size:21px;margin:24px 0 10px!important}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
+@media(max-width:600px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:12.5px;color:var(--mut);margin:12px 0 6px;font-weight:600;letter-spacing:.02em}
+.opt{border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px;background:var(--soft);
+  transition:border-color .35s var(--ease),background-color .35s var(--ease),box-shadow .35s var(--ease)}
+.opt:focus-within{border-color:color-mix(in srgb,var(--gold) 55%,var(--bd));box-shadow:0 10px 24px -16px rgba(6,56,61,.4)}
+.opt.new{animation:optIn .55s var(--ease) backwards}
+.opt.key{border-color:var(--gold);background:var(--goldbg)}
+.opt .h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.opt .h b{background:var(--pri);color:var(--gold2);border-radius:50%;width:32px;height:32px;display:grid;place-items:center;flex:none;font-family:var(--serif);font-size:18px;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 45%,transparent);transition:background-color .35s,color .35s}
+.opt.key .h b{background:var(--gold);color:var(--pri);animation:pop .5s var(--ease)}
+.opt .h input{background:var(--card)}
+.imgbox{display:flex;gap:6px;align-items:center;margin-top:6px}
+.imgbox input{flex:1;min-width:0}
+.prev{max-width:240px;max-height:150px;display:block;margin-top:10px;border-radius:10px;border:1px solid var(--bd);box-shadow:var(--sh);animation:fade .6s var(--ease) backwards}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid var(--bd);align-items:center}
+.bar button:first-child{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#06383d;padding:10px 24px}
+.bar button:first-child:hover{filter:brightness(1.07)}
+#f30{min-width:170px}
+
+/* ---------- notifikasi ---------- */
+#msg{position:fixed;bottom:26px;left:50%;transform:translate(-50%,26px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;
+  padding:12px 24px 12px 18px;border-radius:999px;color:#fff;z-index:9;box-shadow:var(--sh-lg);font-weight:500;
+  transition:opacity .35s var(--ease),transform .5s var(--ease)}
+#msg::before{content:"";width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.9);flex:none}
+#msg.show{opacity:1;transform:translate(-50%,0)}
+
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:putar .7s linear infinite}
+
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:var(--bd);border-radius:8px}::-webkit-scrollbar-thumb:hover{background:var(--gold)}
+
+/* ---------- keyframes ---------- */
+@keyframes putar{to{transform:rotate(360deg)}}
+@keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(6vmax,4vmax) scale(1.12)}}
+@keyframes loginIn{from{opacity:0;transform:translateY(28px) scale(.97);filter:blur(8px)}}
+@keyframes keluar{to{opacity:0;transform:translateY(-16px) scale(.97);filter:blur(6px)}}
+@keyframes naik{from{opacity:0;transform:translateY(14px)}}
+@keyframes garis{from{transform:scaleX(0)}}
+@keyframes headerIn{from{transform:translateY(-100%);opacity:0}}
+@keyframes itemIn{from{opacity:0;transform:translateX(-12px)}}
+@keyframes editorIn{from{opacity:0;transform:translateY(16px)}}
+@keyframes optIn{from{opacity:0;transform:translateY(12px) scale(.985)}}
+@keyframes pop{0%{transform:scale(.7)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes fade{from{opacity:0}}
+@keyframes shake{20%{transform:translateX(-9px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ---------- TEMA TOSCA MEWAH + LOGO ---------- */
+body{background:
+  radial-gradient(1200px 600px at 85% -10%,rgba(20,184,166,.14),transparent 60%),
+  radial-gradient(900px 500px at -10% 110%,rgba(176,141,87,.12),transparent 60%),
+  var(--bg)}
+.emblem.logo{width:104px;height:104px;padding:9px;background:#fff;border:2px solid var(--gold);
+  box-shadow:0 0 0 7px color-mix(in srgb,var(--gold) 16%,transparent),0 0 0 14px color-mix(in srgb,var(--tosca) 10%,transparent),0 16px 30px -12px rgba(6,56,61,.55)}
+.emblem.logo img{width:100%;height:100%;object-fit:contain;display:block}
+.sekolah{margin:-8px 0 2px;text-align:center;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.sekolah::before,.sekolah::after{content:"";display:inline-block;width:22px;height:1px;background:currentColor;vertical-align:middle;margin:0 10px;opacity:.6}
+#login{padding-top:46px;background:linear-gradient(180deg,color-mix(in srgb,var(--tosca) 7%,var(--card)),var(--card) 38%)}
+#login::before{height:4px;background:linear-gradient(90deg,var(--tosca),var(--gold2),var(--gold),var(--gold2),var(--tosca))}
+#login h2{background:linear-gradient(120deg,var(--pri2),var(--tosca) 55%,var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+#login button{background:linear-gradient(135deg,#0b6168,#06383d);box-shadow:0 10px 22px -10px rgba(6,56,61,.7)}
+header{background:linear-gradient(115deg,#04282c 0%,#06383d 35%,#0b6168 80%,#0f8f8a 100%)}
+header::after{height:2px}
+header h1 .mark{width:44px;height:44px;padding:4px;background:#fff;border:1.5px solid var(--gold);box-shadow:0 0 0 3px rgba(214,185,138,.25)}
+header h1 .mark img{width:100%;height:100%;object-fit:contain;display:block}
+header #btnNew{background:linear-gradient(135deg,#ecd2a3,#c9a468);box-shadow:0 6px 16px -8px rgba(214,185,138,.8)}
+.card{border-color:color-mix(in srgb,var(--tosca) 18%,var(--bd))}
+.item.on{background:linear-gradient(90deg,color-mix(in srgb,var(--tosca) 13%,transparent),var(--goldbg))}
+.item small{background:linear-gradient(135deg,var(--pri2),var(--pri))}
+#editor{border-top:3px solid var(--tosca);border-image:linear-gradient(90deg,var(--tosca),var(--gold2),var(--tosca)) 1;border-image-slice:1;border-radius:0 0 16px 16px}
+#editor h3::after{width:90px;height:3px;background:linear-gradient(90deg,var(--tosca),var(--gold))}
+.opt .h b{background:linear-gradient(135deg,var(--pri2),var(--pri))}
+.opt.key .h b{background:linear-gradient(135deg,var(--gold2),var(--gold))}
+input:focus,select:focus,textarea:focus{border-color:var(--tosca);box-shadow:0 0 0 4px color-mix(in srgb,var(--tosca) 22%,transparent)}
+button.sec:hover{border-color:var(--tosca)}
+::-webkit-scrollbar-thumb:hover{background:var(--tosca)}
+
+/* ---------- MOBILE FRIENDLY ---------- */
+html{-webkit-text-size-adjust:100%}
+img,video{max-width:100%}
+@media(max-width:800px){
+  header{position:relative;padding:12px 14px;gap:8px}
+  header h1{flex:1 0 100%;margin:0 0 2px;font-size:20px}
+  header select,header input{max-width:none;flex:1 1 100%}
+  header button{flex:1 1 calc(50% - 4px)}
+  #list{top:auto}
+  #list .item{padding:13px 12px 13px 16px}
+  body{font-size:15px}
+}
+@media(max-width:600px){
+  input,select,textarea{font-size:16px}
+  #login{margin-top:8vh;padding:40px 22px 24px}
+  #login h2{font-size:30px}
+  .emblem.logo{width:92px;height:92px}
+  #editor h3{font-size:23px}
+  .bar{flex-direction:column;align-items:stretch}
+  .bar button{width:100%;padding:13px 18px}
+  .imgbox{flex-wrap:wrap}
+  .imgbox input{flex:1 1 100%}
+  .prev{max-width:100%}
+  #f30{min-width:0;width:100%}
+  #msg{width:calc(100% - 28px);bottom:14px;border-radius:16px;padding:12px 16px}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="emblem logo"><img class="logo-img" alt="Logo SMP Negeri 1 Cianjur"></div>
+  <h2>Editor Bank Soal</h2>
+  <div class="sekolah">SMP Negeri 1 Cianjur</div>
+  <p class="sub">Masuk untuk mengelola soal ujian.</p>
+  <input type="password" id="pass" placeholder="Password admin" autofocus>
+  <button id="btnLogin">Masuk</button>
+  <div id="loginErr"></div>
+</div>
+
+<header id="top" style="display:none">
+  <h1><span class="mark"><img class="logo-img" alt="Logo"></span>Editor Bank Soal</h1>
+  <select id="fMapel"></select>
+  <input id="fCari" placeholder="Cari teks soal…">
+  <button class="sec" id="btnReload"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Muat ulang</button>
+  <button id="btnNew"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Soal baru</button>
+</header>
+
+<div id="app">
+  <div class="card" id="list"></div>
+  <div class="card" id="editor"></div>
+  <div class="card" id="hint">
+    <div>
+      <div class="emblem"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 11h8M8 15h5"/></svg></div>
+      <h3>Pilih soal untuk disunting</h3>
+      <p>Klik salah satu soal di daftar, atau buat soal baru lewat tombol di bagian atas.</p>
+    </div>
+  </div>
+</div>
+<div id="msg" role="status" aria-live="polite"></div>
+
+<script>
+const LOGO_SEKOLAH = 'data:image/png;base64,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';
+document.querySelectorAll('.logo-img').forEach(function(im){ im.src = LOGO_SEKOLAH; });
+const GAS = 'https://script.google.com/macros/s/AKfycbzzhNg4lbQtSAOprgmPkzqn48SJ1JMK_jwRmyEs_sRqILh9P4t2lV-IbOAvHGYyRfq5/exec';
+const HURUF = 'ABCDEFGHIJKL'.split('');
+const NC = 31, I_KUNCI = 30;
+let pass = '', ROWS = [], cur = null, shownOpt = 4;
+
+const $ = id => document.getElementById(id);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.textContent = h; return e; };
+
+const IC = {
+  up:    '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 20h16"/></svg>',
+  x:     '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  save:  '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/></svg>',
+  trash: '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  plus:  '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>'
+};
+const btn = (cls, icon, text) => { const b = el('button', cls); b.innerHTML = (icon || '') + text; return b; };
+
+function toast(t, ok = true) {
+  const m = $('msg'); m.textContent = t; m.style.background = ok ? 'var(--ok)' : 'var(--bad)';
+  m.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => m.classList.remove('show'), 2800);
+}
+
+async function apiGet(params) {
+  const r = await fetch(GAS + '?' + new URLSearchParams(params));
+  return r.json();
+}
+async function apiPost(body) {
+  const r = await fetch(GAS, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+  return r.json();
+}
+
+/* ---------- login & muat data ---------- */
+$('btnLogin').onclick = async () => {
+  const b = $('btnLogin'), lg = $('login');
+  if (b.disabled) return;
+  pass = $('pass').value;
+  $('loginErr').textContent = '';
+  b.disabled = true; $('pass').disabled = true;
+  b.innerHTML = '<span class="spin"></span>Memuat soal…';
+  const ok = await muat();
+  b.disabled = false; $('pass').disabled = false; b.textContent = 'Masuk';
+  if (ok) {
+    lg.classList.add('out');
+    setTimeout(() => {
+      lg.style.display = 'none';
+      $('top').style.display = 'flex'; $('app').style.display = 'grid';
+      $('top').classList.add('reveal'); $('app').classList.add('reveal');
+      renderList(true);
+    }, 420);
+  } else {
+    lg.classList.remove('shake'); void lg.offsetWidth; lg.classList.add('shake');
+    $('pass').focus();
+  }
+};
+$('pass').onkeydown = e => { if (e.key === 'Enter') $('btnLogin').click(); };
+$('btnReload').onclick = () => muat();
+
+async function muat() {
+  try {
+    const d = await apiGet({ action: 'adminListSoal', pass });
+    if (!d.success) { $('loginErr').textContent = d.message; toast(d.message, false); return false; }
+    ROWS = d.rows;
+    const sel = $('fMapel'), old = sel.value;
+    const kode = [...new Set(ROWS.map(r => r.v[0]))];
+    sel.innerHTML = '';
+    kode.forEach(k => { const o = el('option', '', k + ' — ' + (ROWS.find(r => r.v[0] === k).v[1] || '')); o.value = k; sel.appendChild(o); });
+    if (kode.includes(old)) sel.value = old;
+    cur = null; $('editor').style.display = 'none';
+    renderList(true);
+    return true;
+  } catch (e) { $('loginErr').textContent = 'Gagal terhubung: ' + e.message; return false; }
+}
+$('fMapel').onchange = () => { cur = null; $('editor').style.display = 'none'; renderList(true); };
+$('fCari').oninput = () => renderList();
+
+/* ---------- daftar soal ---------- */
+function rowsMapel() { return ROWS.filter(r => r.v[0] === $('fMapel').value); }
+
+function renderList(anim) {
+  const box = $('list'); box.innerHTML = '';
+  const q = $('fCari').value.toLowerCase();
+  const all = rowsMapel();
+  if (!all.length) { box.appendChild(el('div', 'empty', 'Belum ada soal.')); return; }
+  let n = 0;
+  all.forEach((r, i) => {
+    if (q && !r.v[4].toLowerCase().includes(q)) return;
+    const it = el('div', 'item' + (cur && cur.row === r.row ? ' on' : '') + (anim ? ' anim' : ''));
+    if (anim) it.style.setProperty('--i', Math.min(n, 14));
+    n++;
+    it.appendChild(el('b', '', (i + 1) + '.'));
+    it.appendChild(el('span', '', r.v[4] || (r.v[5] ? '[soal bergambar]' : '(kosong)')));
+    it.appendChild(el('small', '', r.v[I_KUNCI] || '?'));
+    it.onclick = () => bukaEditor(r);
+    box.appendChild(it);
+  });
+  if (!n) box.appendChild(el('div', 'empty', 'Tidak ada soal yang cocok.'));
+}
+
+/* ---------- gambar ---------- */
+async function tampilGambar(img, url) {
+  img.style.display = 'none';
+  if (!url) return;
+  try {
+    if (url.indexOf('action=proxyImage') > -1) {
+      const d = await (await fetch(url)).json();
+      if (d.success) { img.src = d.dataUri; img.style.display = 'block'; }
+    } else { img.src = url; img.style.display = 'block'; }
+  } catch (e) {}
+}
+
+function kompres(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const s = Math.min(1, 1000 / Math.max(im.width, im.height));
+        const c = document.createElement('canvas');
+        c.width = im.width * s; c.height = im.height * s;
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', 0.82).split(',')[1]);
+      };
+      im.onerror = rej; im.src = fr.result;
+    };
+    fr.onerror = rej; fr.readAsDataURL(file);
+  });
+}
+
+function imgField(label, id, val) {
+  const w = el('div');
+  w.appendChild(el('label', '', label));
+  const b = el('div', 'imgbox');
+  const inp = el('input'); inp.type = 'text'; inp.id = id; inp.value = val || ''; inp.placeholder = 'URL gambar (kosongkan bila tidak ada)';
+  const UP = IC.up + 'Upload';
+  const up = btn('sec', '', UP);
+  const rm = btn('sec', '', IC.x); rm.title = 'Hapus gambar'; rm.setAttribute('aria-label', 'Hapus gambar');
+  const fi = el('input'); fi.type = 'file'; fi.accept = 'image/*'; fi.style.display = 'none';
+  const pv = el('img', 'prev'); pv.style.display = 'none';
+  up.onclick = () => fi.click();
+  rm.onclick = () => { inp.value = ''; pv.style.display = 'none'; };
+  fi.onchange = async () => {
+    if (!fi.files[0]) return;
+    up.disabled = true; up.textContent = '…';
+    try {
+      const b64 = await kompres(fi.files[0]);
+      const d = await apiPost({ action: 'uploadGambar', base64: b64, fileName: 'soal_' + Date.now() + '.jpg', mimeType: 'image/jpeg' });
+      if (d.success) { inp.value = d.url; tampilGambar(pv, d.url); toast('Gambar terunggah'); }
+      else toast(d.message, false);
+    } catch (e) { toast('Upload gagal', false); }
+    up.disabled = false; up.innerHTML = UP; fi.value = '';
+  };
+  inp.onchange = () => tampilGambar(pv, inp.value.trim());
+  b.append(inp, up, rm, fi); w.append(b, pv);
+  tampilGambar(pv, val);
+  return w;
+}
+
+/* ---------- editor ---------- */
+function bukaEditor(r, baru) {
+  cur = baru ? { row: 0, v: r.v.slice() } : r;
+  const v = cur.v;
+  shownOpt = 4;
+  HURUF.forEach((h, i) => { if (v[6 + 2 * i] || v[7 + 2 * i]) shownOpt = Math.max(shownOpt, i + 1); });
+  renderList();
+
+  const ed = $('editor'); ed.style.display = 'block'; ed.innerHTML = '';
+  ed.classList.remove('enter'); void ed.offsetWidth; ed.classList.add('enter');
+  if (window.innerWidth <= 800) setTimeout(() => ed.scrollIntoView({behavior:'smooth', block:'start'}), 60);
+  const nomor = baru ? 'Soal baru' : 'Soal no. ' + (rowsMapel().findIndex(x => x.row === cur.row) + 1) + ' (baris sheet ' + cur.row + ')';
+  ed.appendChild(el('h3', '', nomor)).style.margin = '0 0 8px';
+
+  const r1 = el('div', 'row');
+  [['Kode mapel', 0], ['Mata pelajaran', 1], ['Password mulai', 2], ['Password selesai', 3]].forEach(([lb, i]) => {
+    const d = el('div'); d.appendChild(el('label', '', lb));
+    const inp = el('input'); inp.type = 'text'; inp.id = 'f' + i; inp.value = v[i]; d.appendChild(inp); r1.appendChild(d);
+  });
+  ed.appendChild(r1);
+  if (!baru) {
+    const l = el('label'); l.style.cssText = 'display:flex;gap:10px;align-items:center;font-weight:400;font-size:13px;cursor:pointer';
+    const cb = el('input'); cb.type = 'checkbox'; cb.id = 'applyAll';
+    l.append(cb, document.createTextNode('Terapkan kode, nama & password ini ke semua soal mapel ini'));
+    ed.appendChild(l);
+  }
+
+  ed.appendChild(el('label', '', 'Soal'));
+  const ta = el('textarea'); ta.id = 'f4'; ta.value = v[4]; ta.rows = 4; ed.appendChild(ta);
+  ed.appendChild(imgField('Gambar soal', 'f5', v[5]));
+
+  ed.appendChild(el('h4', '', 'Pilihan jawaban')).style.margin = '14px 0 6px';
+  const ob = el('div'); ob.id = 'optBox'; ed.appendChild(ob);
+  renderOpts(v);
+  const more = btn('sec', IC.plus, 'Tambah opsi');
+  more.onclick = () => {
+    const prev = shownOpt;
+    simpanKeV(); if (shownOpt < 12) shownOpt++;
+    renderOpts(cur.v, prev);
+    const last = $('optBox').lastElementChild;
+    if (last && shownOpt > prev) last.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  ed.appendChild(more);
+
+  ed.appendChild(el('label', '', 'Kunci jawaban'));
+  const ks = el('select'); ks.id = 'f30';
+  ['', ...HURUF].forEach(h => { const o = el('option', '', h || '— pilih —'); o.value = h; ks.appendChild(o); });
+  ks.value = (v[I_KUNCI] || '').trim().toUpperCase();
+  ks.onchange = () => document.querySelectorAll('#optBox .opt').forEach((o, i) => o.classList.toggle('key', HURUF[i] === ks.value));
+  ed.appendChild(ks);
+
+  const bar = el('div', 'bar');
+  const sv = btn('', IC.save, 'Simpan'); sv.onclick = simpan;
+  bar.appendChild(sv);
+  if (!baru) { const dl = btn('bad', IC.trash, 'Hapus'); dl.onclick = hapus; bar.appendChild(dl); }
+  const cl = btn('sec', '', 'Batal'); cl.onclick = () => { cur = null; ed.style.display = 'none'; renderList(); };
+  bar.appendChild(cl);
+  ed.appendChild(bar);
+  ed.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderOpts(v, animFrom = Infinity) {
+  const ob = $('optBox'); ob.innerHTML = '';
+  const kunci = (v[I_KUNCI] || '').trim().toUpperCase();
+  for (let i = 0; i < shownOpt; i++) {
+    const o = el('div', 'opt' + (i >= animFrom ? ' new' : '') + (HURUF[i] === kunci ? ' key' : ''));
+    const h = el('div', 'h'); h.appendChild(el('b', '', HURUF[i]));
+    const inp = el('input'); inp.type = 'text'; inp.id = 'f' + (6 + 2 * i); inp.value = v[6 + 2 * i]; inp.placeholder = 'Teks pilihan ' + HURUF[i];
+    h.appendChild(inp); o.appendChild(h);
+    o.appendChild(imgField('Gambar pilihan ' + HURUF[i], 'f' + (7 + 2 * i), v[7 + 2 * i]));
+    ob.appendChild(o);
+  }
+}
+
+function simpanKeV() {           // salin isi form ke cur.v (agar tidak hilang saat render ulang)
+  for (let i = 0; i < NC; i++) { const e = $('f' + i); if (e) cur.v[i] = e.value; }
+}
+
+async function simpan() {
+  simpanKeV();
+  const v = cur.v;
+  if (!v[0].trim()) return toast('Kode mapel wajib diisi', false);
+  if (!v[4].trim() && !v[5].trim()) return toast('Soal atau gambar soal harus diisi', false);
+  if (!v[I_KUNCI]) return toast('Pilih kunci jawaban', false);
+  const baru = cur.row === 0;
+  const body = baru
+    ? { action: 'adminTambahSoal', pass, values: v }
+    : { action: 'adminSaveSoal', pass, row: cur.row, kodeLama: ROWS.find(r => r.row === cur.row).v[0], values: v, applyAll: $('applyAll') && $('applyAll').checked };
+  try {
+    const d = await apiPost(body);
+    if (!d.success) return toast(d.message, false);
+    toast('Tersimpan ✓');
+    const kodeBaru = v[0];
+    await muat();
+    $('fMapel').value = kodeBaru; renderList(true);
+  } catch (e) { toast('Gagal menyimpan: ' + e.message, false); }
+}
+
+async function hapus() {
+  if (!confirm('Hapus soal ini dari sheet?')) return;
+  const kode = ROWS.find(r => r.row === cur.row).v[0];
+  const d = await apiPost({ action: 'adminHapusSoal', pass, row: cur.row, kodeLama: kode });
+  if (!d.success) return toast(d.message, false);
+  toast('Soal dihapus');
+  await muat(); $('fMapel').value = kode; renderList(true);
+}
+
+$('btnNew').onclick = () => {
+  const k = $('fMapel').value, ref = ROWS.find(r => r.v[0] === k);
+  const v = new Array(NC).fill('');
+  if (ref) { v[0] = ref.v[0]; v[1] = ref.v[1]; v[2] = ref.v[2]; v[3] = ref.v[3]; }
+  bukaEditor({ v }, true);
+};
+</script>
+</body>
+</html>
